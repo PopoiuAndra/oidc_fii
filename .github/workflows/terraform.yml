@@ -18,52 +18,52 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-            - name: Setup Terraform
+      - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4
 
-            - name: Configure AWS Credentials
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
           role-session-name: "GitHubActions-CloudPulse"
           aws-region: ${{ secrets.AWS_REGION }}
 
-            # --- LINTING & SECURITY (NON-BLOCKING) ---
+      # --- LINTING & SECURITY (NON-BLOCKING) ---
 
-            - name: Install and Run TFLint
+      - name: Install and Run TFLint
         continue-on-error: true
         run: |
           curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
           tflint --init
           tflint
 
-            - name: Install and Run tfsec
+      - name: Install and Run tfsec
         continue-on-error: true
         run: |
           curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
           tfsec .
 
-            # --- ACTUAL DEPLOYMENT (BLOCKING) ---
+      # --- ACTUAL DEPLOYMENT (BLOCKING) ---
 
-            - name: Terraform Format
+      - name: Terraform Format
         run: terraform fmt -check
 
-            - name: Terraform Initialize
+      - name: Terraform Initialize
         run: terraform init
 
-            - name: Terraform Validate
+      - name: Terraform Validate
         run: terraform validate
 
-            - name: Terraform Plan
+      - name: Terraform Plan
         run: terraform plan -out=tfplan
 
-            - name: Terraform Apply
+      - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
 
-       #     - name: Terraform Destroy
-       # run: terraform destroy -auto-approve
+      # - name: Terraform Destroy
+      #   run: terraform destroy -auto-approve
 
-            - name: 📝 Post Deployment Summary
+      - name: 📝 Post Deployment Summary
         if: success()
         run: |
           echo "##CloudPulse Deployment Complete!" >> $GITHUB_STEP_SUMMARY
